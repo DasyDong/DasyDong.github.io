@@ -1,0 +1,388 @@
+---
+title: "在centos 7上部署kubernetes-上篇手动"
+layout: post
+date: 2018-01-01 10:18
+image: /img/images/markdown.jpg
+headerImage: false
+tag:
+- k8s
+- linux
+category: blog
+author: dong
+
+---
+
+本文是在centos上部署k8s单点
+
+## 1 准备centos虚机
+### 1.1 生成centos机器
+用vagrant + virtualbox 生成2台虚机：
+box 源：http://www.vagrantbox.es/
+
+```
+ $ vagrant box add {title} {url}  (vagrant box add centos centos-7.0-x86_64.box)
+```
+  (下载很慢， 建议先把box下载到本地)
+    CentOS 7.0 x64 (Minimal, VirtualBox Guest Additions 4.3.28, Puppet 3.8.1 - see here for more infos)  VirtualBox   https://github.com/tommy-muehle/puppet-vagrant-boxes/releases/download/1.1.0/centos-7.0- x86_64.box
+```
+ $ vagrant init {title}   修改mem到2048
+ $ vagrant up
+ $ vagrant ssh
+```
+### 1.2 虚机配置
+查看ip地址查看互通
+```
+ip addr show
+```
+用swap分区
+```sudo swapoff -a
+```
+永久禁用
+```sudo vi /etc/fstab```
+```
+#/dev/mapper/centos-swap swap 注释掉此行
+```
+
+关闭SELinux和防火墙
+```
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config # 修改配置
+```
+临时生效（永久生效，需重启）
+```
+setenforce 0
+```
+关闭防火墙
+```
+systemctl stop firewalld && systemctl disable firewalld
+```
+## 2 kubernetes 配置
+### 2.1 配置kubernetes yum源
+
+```vim  /etc/yum.repos.d/kubernetes.repo```
+```[kubernetes]
+name=kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+gpgcheck=0
+enable=1
+```
+```
+cd /etc/yum.repos.d/
+wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+yum clean all
+yum repolist
+```
+###2.2 安装kubeadm, kubelet and kubectl
+```
+yum install docker-ce kubelet-1.11.1 kubeadm-1.11.1  kubectl-1.11.1 kubernetes-cni
+systemctl enable docker
+systemctl enable kubelet.service
+systemctl start docker
+systemctl start kubelet
+```
+### 2.3 拉取k8s镜像
+由于国内网络原因，kubernetes的镜像托管在google云上，无法直接下载，所以直接把把镜像搞下来有个技术大牛把gcr.io的镜像每天同步到
+https://github.com/anjia0532/gcr.io_mirror/tree/master/google-containers ，因此，如果需要用到gcr.io的镜像，可以执行如下的脚本进行镜像拉取
+或者直接拉去譬如 https://hub.docker.com/r/anjia0532/google-containers.etcd-amd64/tags/
+
+vim pullimages.sh
+```
+#!/bin/bash
+images=(kube-proxy-amd64:v1.11.1 kube-scheduler-amd64:v1.11.1 kube-controller-manager-amd64:v1.11.1
+kube-apiserver-amd64:v1.11.1 etcd-amd64:3.2.18 coredns:1.1.3 pause:3.1 )
+for imageName in ${images[@]} ; do
+docker pull anjia0532/google-containers.$imageName
+docker tag anjia0532/google-containers.$imageName k8s.gcr.io/$imageName
+docker rmi anjia0532/google-containers.$imageName
+done
+```
+sh pullimages.sh。（可能网络原因， 如果遇到pull失败就重试）
+
+
+### 2.4 kubernetes集群不允许开启swap，所以我们需要忽略这个错误
+
+vim /etc/sysconfig/kubelet
+KUBELET_EXTRA_ARGS="--fail-swap-on=false"
+
+编写kubeadm.yaml
+
+### 2.5 编写kubeadm
+vim kubeadm.yaml
+```
+apiVersion: kubeadm.k8s.io/v1alpha1
+kind: MasterConfiguration
+controllerManagerExtraArgs:
+  horizontal-pod-autoscaler-use-rest-clients: "true"
+  horizontal-pod-autoscaler-sync-period: "10s"
+  node-monitor-grace-period: "10s"
+apiServerExtraArgs:
+  runtime-config: "api/all=true"
+kubernetesVersion: "v1.11.1"
+```
+
+```
+kubeadm init --config kubeadm.yaml
+```
+*Q1：
+[preflight] Some fatal errors occurred:
+hostname "" a DNS-1123 subdomain must consist of lower case alphanumeric charac
+
+*A1:原因是 hostname 和 DNS 的解析规则不匹配，改掉自己的hostname就好了。
+```
+$ hostname
+$ hostnamectl set-hostname centos71
+$ hostname
+```
+*Q2：
+[preflight] Some fatal errors occurred:
+    [ERROR SystemVerification]: unsupported docker version: 18.09.0
+[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+
+*A2:这是因为kubeadm v1.11.1 还不完全支持docker 18。09.0版本
+我们暂时先忽略这个错误 执行：
+```
+kubeadm init --config kubeadm.yaml --ignore-preflight-errors=SystemVerification
+
+```
+这样就可以完成 Kubernetes Master 的部署了，这个过程只需要几分钟，部署完成后，kubeadm 会生成一行指令：
+```kubeadm join 10.0.2.15:6443 --token u5aost.1ap6jceb68f6un33 --discovery-token-ca-cert-hash sha256:b6525ae679799e42d64adc9e32a4016143ebb1b5cf9a4e0376f3b786fafdb086```
+
+(如果忘记了token， kubeadm token create --print-join-command  重新生成新的)
+执行成功后详细output：
+```
+[init] using Kubernetes version: v1.11.1
+[preflight] running pre-flight checks
+I1202 13:06:14.690793   16157 kernel_validator.go:81] Validating kernel version
+I1202 13:06:14.691045   16157 kernel_validator.go:96] Validating kernel config
+[preflight] The system verification failed. Printing the output from the verification:
+KERNEL_VERSION: 3.10.0-229.el7.x86_64
+CONFIG_NAMESPACES: enabled
+CONFIG_NET_NS: enabled
+CONFIG_PID_NS: enabled
+CONFIG_IPC_NS: enabled
+CONFIG_UTS_NS: enabled
+CONFIG_CGROUPS: enabled
+CONFIG_CGROUP_CPUACCT: enabled
+CONFIG_CGROUP_DEVICE: enabled
+CONFIG_CGROUP_FREEZER: enabled
+CONFIG_CGROUP_SCHED: enabled
+CONFIG_CPUSETS: enabled
+CONFIG_MEMCG: enabled
+CONFIG_INET: enabled
+CONFIG_EXT4_FS: enabled (as module)
+CONFIG_PROC_FS: enabled
+CONFIG_NETFILTER_XT_TARGET_REDIRECT: enabled (as module)
+CONFIG_NETFILTER_XT_MATCH_COMMENT: enabled (as module)
+CONFIG_OVERLAY_FS: enabled (as module)
+CONFIG_AUFS_FS: not set - Required for aufs.
+CONFIG_BLK_DEV_DM: enabled (as module)
+DOCKER_VERSION: 18.09.0
+OS: Linux
+CGROUPS_CPU: enabled
+CGROUPS_CPUACCT: enabled
+CGROUPS_CPUSET: enabled
+CGROUPS_DEVICES: enabled
+CGROUPS_FREEZER: enabled
+CGROUPS_MEMORY: enabled
+[preflight] Some fatal errors occurred:
+    [ERROR SystemVerification]: unsupported docker version: 18.09.0
+[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+[root@centos71 yum.repos.d]# kubeadm init --config kubeadm.yaml --ignore-preflight-errors=SystemVerification
+[init] using Kubernetes version: v1.11.1
+[preflight] running pre-flight checks
+I1202 13:06:28.984914   16192 kernel_validator.go:81] Validating kernel version
+I1202 13:06:28.985037   16192 kernel_validator.go:96] Validating kernel config
+[preflight] The system verification failed. Printing the output from the verification:
+KERNEL_VERSION: 3.10.0-229.el7.x86_64
+CONFIG_NAMESPACES: enabled
+CONFIG_NET_NS: enabled
+CONFIG_PID_NS: enabled
+CONFIG_IPC_NS: enabled
+CONFIG_UTS_NS: enabled
+CONFIG_CGROUPS: enabled
+CONFIG_CGROUP_CPUACCT: enabled
+CONFIG_CGROUP_DEVICE: enabled
+CONFIG_CGROUP_FREEZER: enabled
+CONFIG_CGROUP_SCHED: enabled
+CONFIG_CPUSETS: enabled
+CONFIG_MEMCG: enabled
+CONFIG_INET: enabled
+CONFIG_EXT4_FS: enabled (as module)
+CONFIG_PROC_FS: enabled
+CONFIG_NETFILTER_XT_TARGET_REDIRECT: enabled (as module)
+CONFIG_NETFILTER_XT_MATCH_COMMENT: enabled (as module)
+CONFIG_OVERLAY_FS: enabled (as module)
+CONFIG_AUFS_FS: not set - Required for aufs.
+CONFIG_BLK_DEV_DM: enabled (as module)
+DOCKER_VERSION: 18.09.0
+OS: Linux
+CGROUPS_CPU: enabled
+CGROUPS_CPUACCT: enabled
+CGROUPS_CPUSET: enabled
+CGROUPS_DEVICES: enabled
+CGROUPS_FREEZER: enabled
+CGROUPS_MEMORY: enabled
+    [WARNING SystemVerification]: unsupported docker version: 18.09.0
+[preflight/images] Pulling images required for setting up a Kubernetes cluster
+[preflight/images] This might take a minute or two, depending on the speed of your internet connection
+[preflight/images] You can also perform this action in beforehand using 'kubeadm config images pull'
+[kubelet] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[preflight] Activating the kubelet service
+[certificates] Generated ca certificate and key.
+[certificates] Generated apiserver certificate and key.
+[certificates] apiserver serving cert is signed for DNS names [centos71 kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.96.0.1 10.0.2.15]
+[certificates] Generated apiserver-kubelet-client certificate and key.
+[certificates] Generated sa key and public key.
+[certificates] Generated front-proxy-ca certificate and key.
+[certificates] Generated front-proxy-client certificate and key.
+[certificates] Generated etcd/ca certificate and key.
+[certificates] Generated etcd/server certificate and key.
+[certificates] etcd/server serving cert is signed for DNS names [centos71 localhost] and IPs [127.0.0.1 ::1]
+[certificates] Generated etcd/peer certificate and key.
+[certificates] etcd/peer serving cert is signed for DNS names [centos71 localhost] and IPs [10.0.2.15 127.0.0.1 ::1]
+[certificates] Generated etcd/healthcheck-client certificate and key.
+[certificates] Generated apiserver-etcd-client certificate and key.
+[certificates] valid certificates and keys now exist in "/etc/kubernetes/pki"
+[kubeconfig] Wrote KubeConfig file to disk: "/etc/kubernetes/admin.conf"
+[kubeconfig] Wrote KubeConfig file to disk: "/etc/kubernetes/kubelet.conf"
+[kubeconfig] Wrote KubeConfig file to disk: "/etc/kubernetes/controller-manager.conf"
+[kubeconfig] Wrote KubeConfig file to disk: "/etc/kubernetes/scheduler.conf"
+[controlplane] wrote Static Pod manifest for component kube-apiserver to "/etc/kubernetes/manifests/kube-apiserver.yaml"
+[controlplane] wrote Static Pod manifest for component kube-controller-manager to "/etc/kubernetes/manifests/kube-controller-manager.yaml"
+[controlplane] wrote Static Pod manifest for component kube-scheduler to "/etc/kubernetes/manifests/kube-scheduler.yaml"
+[etcd] Wrote Static Pod manifest for a local etcd instance to "/etc/kubernetes/manifests/etcd.yaml"
+[init] waiting for the kubelet to boot up the control plane as Static Pods from directory "/etc/kubernetes/manifests"
+[init] this might take a minute or longer if the control plane images have to be pulled
+[apiclient] All control plane components are healthy after 44.003762 seconds
+[uploadconfig] storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
+[kubelet] Creating a ConfigMap "kubelet-config-1.11" in namespace kube-system with the configuration for the kubelets in the cluster
+[markmaster] Marking the node centos71 as master by adding the label "node-role.kubernetes.io/master=''"
+[markmaster] Marking the node centos71 as master by adding the taints [node-role.kubernetes.io/master:NoSchedule]
+[patchnode] Uploading the CRI Socket information "/var/run/dockershim.sock" to the Node API object "centos71" as an annotation
+[bootstraptoken] using token: kzxa3v.d18biqja99880bd9
+[bootstraptoken] configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+[bootstraptoken] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+[bootstraptoken] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+[bootstraptoken] creating the "cluster-info" ConfigMap in the "kube-public" namespace
+[addons] Applied essential addon: CoreDNS
+[addons] Applied essential addon: kube-proxy
+
+Your Kubernetes master has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+You can now join any number of machines by running the following on each node
+as root:
+
+  kubeadm join 10.0.2.15:6443 --token kzxa3v.d18biqja99880bd9 --discovery-token-ca-cert-hash sha256:6ab24b00ffdac827dd5e24fd5bde050130b46bab4bb57bbe07e3f01bd294098e
+```
+###  2.6配置kubectl与apiserver的认证
+```
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+检查健康状态节点状态
+```
+kubectl get cs
+kubectl get nodes
+```
+### 2.7 部署网络插件Weave
+```
+kubectl apply -f https://git.io/weave-kube-1.6.   把weave yaml down到本地跑
+```
+
+查看：
+```
+[root@centos71 yum.repos.d]# kubectl get pods -n kube-system | grep weave
+NAME                               READY     STATUS    RESTARTS   AGE
+weave-net-jq8vw                    2/2       Running   0          23s
+```
+
+加入污点
+```
+kubectl taint nodes --all node-role.kubernetes.io/master-
+```
+### 2.8 可视化Dashboard插件，下载镜像
+```
+wget https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+docker pull anjia0532/google-containers.kubernetes-dashboard-amd64:v1.10.0
+docker tag  anjia0532/google-containers.kubernetes-dashboard-amd64:v1.10.0   k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.0
+docker rmi  anjia0532/google-containers.kubernetes-dashboard-amd64:v1.10.0
+```
+修改kubernetes-dashboard.yaml，可以直接token认证进入
+
+```yaml
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kube-system
+spec:
+  # 添加Service的type为NodePort
+  type: NodePort
+  ports:
+    - port: 443
+      targetPort: 8443
+      # 添加映射到虚拟机的端口,k8s只支持30000以上的端口
+      nodePort: 30001
+  selector:
+    k8s-app: kubernetes-dashboard
+```
+
+```
+kubectl apply -f   kubernetes-dashboard.yaml
+```
+看 Dashboard 对应的 Pod 的状态了
+
+kubectl get pods -n kube-system
+### 2.9 部署容器存储插件，下载镜像
+```
+kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/operator.yaml
+kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml
+```
+查看安装情况
+```
+kubectl get pods -n rook-ceph-system
+kubectl get pods -n rook-ceph
+```
+开启服务
+```
+nohup  kubectl proxy --address='0.0.0.0'  --accept-hosts='^*$'  --disable-filter=true &
+```
+获取token命令
+```
+kubectl -n kube-system describe $(kubectl -n kube-system get secret -n kube-system -o name | grep namespace) | grep token
+```
+访问dashboard
+
+通过node节点的ip，加刚刚我们设置的nodePort就可以访问了。
+
+https://<node-ip>:<node-port>
+
+参考:
+
+https://jusene.me/2018/09/10/k8s-1/
+
+http://blog.51cto.com/ghbsunny/2162205?source=dra
+
+https://my.oschina.net/andylo25/blog/1618342
+
+https://imroc.io/posts/kubernetes/install-kubernetes-1.9-on-centos7-with-kubeadm/
+
+https://segmentfault.ceom/a/1190000013681047
+
+https://www.centos.bz/2018/07/kubernetes%E7%9A%84dashboard%E7%99%BB%E5%BD%95%E6%96%B9%E5%BC%8F/
+
+https://www.datayang.com/article/45
+

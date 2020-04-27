@@ -1,0 +1,107 @@
+---
+title: "kubernetes HPA调研"
+layout: post
+date: 2019-07-06 15:38
+image: /img/images/markdown.jpg
+headerImage: false
+tag:
+- k8s
+category: blog
+author: dong
+
+---
+#### 概念及原理
+利用Horizontal Pod Autoscaling（HPA），kubernetes能够根据监测到的CPU利用率自动的扩缩容 replication controller，deployment和replica set中pod的数量。<br></br>
+HPA作为kubernetes API resource和controller 的实现。Resource确定controller的行为。Controller 会根据监测到用户指定的目标的 CPU 利用率周期性地调整 replication controller 或 deployment 的 replica 数量。
+
+![image](/img/images/k8s/hpa-logic.png)
+
+HPA由一个控制循环实现，循环周期由controller manager 中的 --horizontal-pod-autoscaler-sync-period标志指定。在每个周期内，controller manager会查询HPA中定义的metric的资源利用率。Controller manager 从 resource metric API（每个 pod 的 resource metric）或者自定义 metric API（所有的metric）中获取 metric。
+
+#### Install Metrics-Server
+
+#### usage
+```
+# kubectl autoscale sts apache2 --cpu-percent=50 --min=1 --max=3
+```
+```
+# kubectl get hpa
+NAME      REFERENCE             TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+apache2   StatefulSet/apache2   5%/10%    1         2         2          33m
+```
+```
+# kubectl describe hpa apache2
+
+Name:                                                  apache2
+Namespace:                                             default
+Labels:                                                <none>
+Annotations:                                           <none>
+CreationTimestamp:                                     Wed, 11 Sep 2019 10:47:42 +0800
+Reference:                                             StatefulSet/apache2
+Metrics:                                               ( current / target )
+  resource cpu on pods  (as a percentage of request):  5% (14m) / 10%
+Min replicas:                                          1
+Max replicas:                                          2
+StatefulSet pods:                                      2 current / 2 desired
+Conditions:
+  Type            Status  Reason               Message
+  ----            ------  ------               -------
+  AbleToScale     True    ScaleDownStabilized  recent recommendations were higher than current one, applying the highest recent recommendation
+  ScalingActive   True    ValidMetricFound     the HPA was able to successfully calculate a replica count from cpu resource utilization (percentage of request)
+  ScalingLimited  False   DesiredWithinRange   the desired count is within the acceptable range
+Events:
+  Type    Reason             Age   From                       Message
+  ----    ------             ----  ----                       -------
+  Normal  SuccessfulRescale  89s   horizontal-pod-autoscaler  New size: 2; reason: cpu resource utilization (percentage of request) above target
+```
+- AbleToScale：表明HPA是否 可以获取和更新伸缩信息，以及是否存在阻止伸缩的各种回退条件
+- ScalingActive：表明HPA是否被启用（即目标的副本数量不为零） 以及是否能够完成伸缩计算。当这一状态为False时，通常表明获取度量指标存在问题。
+- ScalingLimitted：表明所需伸缩的值被HorizontalPodAutoscaler所定义的最大或者最小值所限制（即已经达到最大或者最小伸缩值）。这通常表明您可能需要调整HorizontalPodAutoscaler 所定义的最大或者最小副本数量的限制了。
+
+#### Demo
+第一步：部署pod、service：
+```
+$ kubectl run php-apache --image=gcr.io/google_containers/hpa-example --requests=cpu=200m --expose --port=80
+service "php-apache" created
+deployment "php-apache" created
+```
+第二步：创建Horizontal Pod Autoscaler：
+```
+$ kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+deployment "php-apache" autoscaled
+```
+```
+$ kubectl get hpa
+NAME         REFERENCE                     TARGET    MINPODS   MAXPODS   REPLICAS   AGE
+php-apache   Deployment/php-apache/scale   0% / 50%  1         10        1
+```
+第三步：增加负载：
+```
+$ kubectl run -i --tty load-generator --image=busybox /bin/sh
+
+Hit enter for command prompt
+
+$ while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
+```
+```
+$ kubectl get hpa
+NAME         REFERENCE                     TARGET      CURRENT   MINPODS   MAXPODS   REPLICAS   AGE
+php-apache   Deployment/php-apache/scale   305% / 50%  305%      1         10        1          3m
+```
+```
+$ kubectl get deployment php-apache
+NAME         DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+php-apache   7         7         7            7           19m
+```
+第四步：停止负载：
+```
+$ kubectl get hpa
+NAME         REFERENCE                     TARGET       MINPODS   MAXPODS   REPLICAS   AGE
+php-apache   Deployment/php-apache/scale   0% / 50%     1         10        1          11m
+
+$ kubectl get deployment php-apache
+NAME         DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+php-apache   1         1         1            1           27m
+```
+
+详细文档：https://jimmysong.io/kubernetes-handbook/concepts/horizontal-pod-autoscaling.html

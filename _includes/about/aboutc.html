@@ -1,0 +1,611 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ </head>
+ <body>
+  <style>
+          html,body,div,p{margin:0;padding:0}
+          body{font-size:14px;font-family:"microsoft yahei";background-color:#ffffff}
+          table{border-collapse:collapse;border-spacing:0;table-layout:fixed}
+          th,td{font-size:14px;padding:0}
+          a{text-decoration:none}
+          img{border:0 none}
+          .blue{text-decoration:none;color:#3c3d5d}
+          .chead{width:1002px}
+          .chead .logo{width:698px;height:90px}
+          .chead .txt{width:152px;height:90px}
+          .column{width:1002px;line-height:28px;border:1px solid #dedede}
+          .column .hbox{width:185px;height:154px}
+          .column .head{display:block;background-color:#fafafa}
+          .column .box{width:100%;background-color:#ffffff;border-top:2px solid #f2f3f5}
+          .column .box1{width:100%;word-wrap:break-word;color:#ffffff;background-color:#3f4160}
+          .column .box2{width:100%;background-color:#f8f9fa}
+          .column .tba{width:940px;padding:0 30px 15px}
+          .column .tbb{width:940px;padding:0 30px}
+          .column .tb1{width:900px;line-height:28px;color:#333333;word-break:break-all;padding:0 20px}
+          .column .tb2{width:430px;padding:0 20px}
+          .column .tb3{width:900px;padding:15px 20px 15px 0}
+          .column .gray,.column .gray2{color:#999999;word-break:break-all}
+          .column .gray2{color:#666666}
+          .column .plate1,.column .plate2{width:430px;height:54px;font-size:16px;font-weight:bold;color:#818ba3}
+          .column .plate1{width:900px;padding:0 50px}
+          .column .plate1 .f16{font-size:14px;font-weight:normal;color:#333333}
+          .column .plate1 .f12{font-size:12px;font-weight:normal;color:#999999}
+          .column .keys,.column .keys2{width:85px;line-height:28px;color:#666666}
+          .column .keys2{width:110px}
+          .column .txt1,.column .txt2,.column .txt3{width:815px;line-height:28px;color:#333333;word-break:break-all}
+          .column .txt2{width:345px}
+          .column .txt3{width:auto;max-width:815px;font-size:14px;font-weight:bold}
+          .column .txt4{width:305px;color:#ffffff;word-break:break-all}
+          .column .infr{width:767px;color:#ffffff;table-layout:auto}
+          .column .vam,.column .grcha{vertical-align:middle;margin-left:5px}
+          .column .box1 .vam{margin-right:5px;margin-left:0}
+          .column .name{font-size:24px;padding-bottom:18px}
+          .column .icard{color:#a1a3ae;padding-bottom:18px}
+          .column .con{border-top:1px dotted #ddd}
+          .column .pr20{width:225px;padding-right:20px}
+          .column .time{width:120px;line-height:28px;color:#666666;padding-left:20px}
+          .column .rtbox{width:765px;line-height:28px;color:#333333;padding:0 20px 0 15px;word-break:break-all}
+          .column .hai,.column .guan{line-height:18px;font-size:12px;color:#ffffff;vertical-align:text-top;margin-left:5px;padding:1px 3px;background-color:#3cbe7f;border-radius:2px}
+          .column .guan{background-color:#ff9f20}
+          .column .tag{display:inline-block;word-break:break-all;#display:inline;#zoom:1}
+          .column .all{color:#666;padding:10px 20px;background-color:#fafafa}
+          .column .tit{width:900px;height:40px;color:#666666;padding:0 20px;background-color:#f5f5f5}
+          .column .p15{padding:15px 0}
+          .column .p5{display:inline-block;color:#666666;padding:0 5px;#display:inline;#zoom:1}
+          .column .cell .skill{width:165px;text-align:right;padding-right:15px}
+          .column .cell .skbg,.column .cell .skco{display:inline-block;width:245px;height:18px;line-height:18px;font-size:12px;color:#ffffff;vertical-align:top;margin-top:6px;background-color:#dddddd;border-radius:20px;#display:inline;#zoom:1}
+          .column .cell .skco{width:235px;font-style:normal;margin-top:0;padding-left:10px;background-color:#ff9f20;z-index:3}
+          .column .sl .skco{width:173px}
+          .column .lh .skco{width:112px}
+          .column .yb .skco{width:51px}
+          .column .fbox strong{font-size:14px;font-weight:bold}
+          .column .cha{font-size:12px;font-weight:normal;color:#00457d;margin-left:5px}
+          .column .cha:hover{color:#ff6000}
+          .column .email{width:330px}
+
+          .eng td,.eng .txt3,.eng .fbox strong{font-size:13px;font-family:'Arial'}
+          .eng .txt1,.eng .rtbox,.eng .phd{width:775px;font-size:13px;font-family:'Arial';line-height:28px}
+          .eng .txt2{width:305px}
+          .eng .txt4{width:245px}
+          .eng .cell .txt3{width:120px}
+          .eng .time,.eng .keys{width:110px;font-size:13px;text-align:right}
+          .eng .cell .skill{width:130px}
+          .eng .phd{padding-left:145px}
+          .eng .keys{padding-right:15px}
+          .eng .pr20{width:205px}
+          .eng .pr20 .keys{width:100px}
+          .eng .email{width:270px}
+
+</style>
+  <table cellpadding="0" cellspacing="0" align="center" bgcolor="#fff" class="column">
+   <tbody>
+    <tr>
+     <td valign="top">
+      <table xmlns="" cellspacing="0" cellpadding="0" border="0" class="box1">
+       <tbody>
+        <tr>
+         <td class="hbox" align="middle"><img src="http://i.51job.com/resume/ajax/image.php?type=avatar&amp;userid=305059126&amp;key=5fe0f8988245b0cd716ebd53e5a4aa68" width="85" height="104" class="head" alt="头像" /></td>
+         <td>
+          <table cellspacing="0" cellpadding="0" border="0" class="infr">
+           <tbody>
+            <tr>
+             <td colspan="2" class="name">董术(DasyDong)</td>
+             <td align="right" class="icard"> 微信:dasydong </td>
+            </tr>
+            <tr>
+             <td valign="top"> <img class="vam" src="http://img01.51jobcdn.com/im/2016/resume/y1.png" width="20" height="20" />在职 </td>
+             <td valign="top"> <img class="vam" src="http://img01.51jobcdn.com/im/2016/resume/y2.png" width="20" height="20" />13918938324 </td>
+             <td valign="top"> <img class="vam" src="http://img01.51jobcdn.com/im/2016/resume/y3.png" width="20" height="20" />dasydong@gmail.com </td>
+             <!--<td valign="top">-->
+             <!--<table cellspacing="0" cellpadding="0" border="0" class="email">-->
+             <!--<tbody>-->
+             <!--<tr>-->
+             <!--<td valign="top"><img class="vam" src="http://img01.51jobcdn.com/im/2016/resume/y3.png" width="20" height="20"></td>-->
+             <!--<td valign="top" class="txt4">dasydong@gmail.com</td>-->
+             <!--</tr>-->
+             <!--</tbody>-->
+             <!--</table>-->
+             <!--</td>-->
+            </tr>
+            <tr>
+             <td valign="top" colspan="3"><p><img class="vam" src="http://img01.51jobcdn.com/im/2016/resume/y4.png" width="20" height="20" />男<span class="p5">|</span>**<span class="p5">|</span>上海-浦东新区<span class="p5">|</span>8年工作经验 <span class="p5">|</span>https://dasydong.github.io/</p></td>
+            </tr>
+           </tbody>
+          </table> </td>
+        </tr>
+       </tbody>
+      </table>
+      <table xmlns="" cellspacing="0" cellpadding="0" border="0" class="box2">
+       <tbody>
+        <tr>
+         <td class="tba">
+          <table cellspacing="0" cellpadding="0" border="0">
+           <tbody>
+            <tr>
+             <td valign="top" class="tb2">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <thead style="height:0">
+                <tr>
+                 <td valign="top" class="keys"></td>
+                 <td valign="top" class="txt2"></td>
+                </tr>
+               </thead>
+               <tbody>
+                <tr>
+                 <td colspan="2" class="plate2">最近工作</td>
+                </tr>
+                <tr>
+                 <td valign="top" class="keys">职位：</td>
+                 <td valign="top" class="txt2">PaaS研发经理</td>
+                </tr>
+                <tr>
+                 <td valign="top" class="keys">公司：</td>
+                 <td valign="top" class="txt2">携程计算机技术（上海）有限公司</td>
+                </tr>
+                <tr>
+                 <td valign="top" class="keys">行业：</td>
+                 <td valign="top" class="txt2">互联网/电子商务</td>
+                </tr>
+               </tbody>
+              </table> </td>
+             <td valign="top" class="tb2">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <thead style="height:0">
+                <tr>
+                 <td valign="top" class="keys"></td>
+                 <td valign="top" class="txt2"></td>
+                </tr>
+               </thead>
+               <tbody>
+                <tr>
+                 <td colspan="2" class="plate2">最高学历/学位</td>
+                </tr>
+                <tr>
+                 <td valign="top" class="keys">专业：</td>
+                 <td valign="top" class="txt2">计算机科学与技术</td>
+                </tr>
+                <tr>
+                 <td valign="top" class="keys">学校：</td>
+                 <td valign="top" class="txt2">大连工业大学（2007/7-2011/7）</td>
+                </tr>
+                <tr>
+                 <td valign="top" class="keys">学历/学位：</td>
+                 <td valign="top" class="txt2">本科</td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+           </tbody>
+          </table> </td>
+        </tr>
+       </tbody>
+      </table>
+      <table xmlns="" cellspacing="0" cellpadding="0" border="0" class="box">
+       <tbody>
+        <tr>
+         <td class="plate1">求职意向</td>
+        </tr>
+        <tr>
+         <td class="tba">
+          <table cellspacing="0" cellpadding="0" border="0">
+           <tbody>
+            <tr>
+             <td class="tb1" colspan="2">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <thead style="height:0">
+                <tr>
+                 <td valign="top" class="keys"></td>
+                 <td valign="top" class="txt1"></td>
+                </tr>
+               </thead>
+               <tbody>
+                <tr>
+                 <td valign="top" class="keys">个人标签：</td>
+                 <td valign="top" class="txt1">
+                     <span class="tag">Python&nbsp;&nbsp;</span>
+                     <span class="tag">Django&nbsp;&nbsp;</span>
+                     <span class="tag">Redis&nbsp;&nbsp;</span>
+                     <span class="tag">Celery&nbsp;&nbsp;</span>
+                     <span class="tag">Go&nbsp;&nbsp;</span>
+                     <span class="tag">Docker&nbsp;&nbsp;</span>
+                     <span class="tag">kubernetes&nbsp;&nbsp;</span>
+                     <span class="tag">Mysql&nbsp;&nbsp;</span>
+                     <span class="tag">Linux&nbsp;&nbsp;</span>
+                     <span class="tag">ELK&nbsp;&nbsp;</span>
+                     <span class="tag">AWS&nbsp;&nbsp;</span>
+                     <span class="tag">Angularjs&nbsp;&nbsp;</span>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+            <tr>
+             <td class="tb2" valign="top">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+               </tbody>
+              </table> </td>
+             <td class="tb2" valign="top">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="keys">地点：</td>
+                 <td valign="top" class="txt2"><span class="tag">上海</span></td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+            <tr>
+             <td class="tb2" valign="top">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="keys">职能/职位：</td>
+                 <td valign="top" class="txt2"> <span class="tag">PaaS研发经理</span><span class="tag">&nbsp;&nbsp;Tech Expert</span> </td>
+                </tr>
+               </tbody>
+              </table> </td>
+             <td class="tb2" valign="top">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="keys">行业：</td>
+                 <td valign="top" class="txt2"><span class="tag">计算机软件</span></td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+            <tr>
+             <td class="tb2" valign="top"> </td>
+             <td class="tb2" valign="top">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="keys">工作类型：</td>
+                 <td valign="top" class="txt2">全职</td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+            <tr>
+             <td class="tb1" colspan="2">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <thead style="height:0">
+                <tr>
+                 <td valign="top" class="keys"></td>
+                 <td valign="top" class="txt1"></td>
+                </tr>
+               </thead>
+               <tbody>
+                <tr>
+                 <td valign="top" class="keys">自我评价：</td>
+                 <td valign="top" class="txt1">
+                     擅长PaaS云平台搭建 Python, Django,Mysql,Celery,Redis
+                     擅长容器部署调度 Docker, kubernetes, Go<br />
+                     专注python, go, kubernetes平台研发<br />
+                     对生活和工作富有激情，对技术执着热爱<br />
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+           </tbody>
+          </table> </td>
+        </tr>
+       </tbody>
+      </table>
+      <table xmlns="" cellspacing="0" cellpadding="0" border="0" class="box">
+       <tbody>
+        <tr>
+         <td class="plate1">工作经验</td>
+        </tr>
+        <tr>
+         <td class="tbb">
+          <table cellspacing="0" cellpadding="0" border="0">
+           <tbody>
+            <tr>
+             <td class="p15">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="time">2013/10-至今</td>
+                 <td valign="top" class="rtbox"> <strong class="txt3">PaaS研发经理</strong><span class="p5">|</span><span>云平台</span> </td>
+                </tr>
+                <tr>
+                 <td class="phd tb1" colspan="2" style="padding-left:155px"> <span>携程计算机技术（上海）有限公司</span><span class="gray">&nbsp;[6年3个月] </span> </td>
+                </tr>
+                <tr>
+                 <td class="phd tb1 gray2" colspan="2" style="padding-left:155px">互联网/电子商务<span class="p5">|</span>10000人以上<span class="p5">|</span>上市公司 </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">工作描述：</td>
+                     <td valign="top" class="txt1">主要负责的工作有： <br />
+                         1. 带领团队开发PaaS持续集成平台 <br />
+                         2. 推进和协调多部门合作 <br />
+                         3. 组件研发和社区贡献 <br />
+                         4. 为公司提供公有云能力 </td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+            <tr>
+             <td class="p15 con">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="time">2011/08-2013/10</td>
+                 <td valign="top" class="rtbox"> <strong class="txt3">Microsoft SDET</strong>
+                     <span class="p5">|</span><span>OSD-homepage</span> </td>
+                </tr>
+                <tr>
+                 <td class="phd tb1" colspan="2" style="padding-left:155px"> <span>中软国际</span><span class="gray">&nbsp;[2年1个月] </span> </td>
+                </tr>
+                <tr>
+                 <td class="phd tb1 gray2" colspan="2" style="padding-left:155px">计算机软件<span class="p5">|</span>500-1000人<span class="p5">|</span>民营公司 </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">工作描述：</td>
+                     <td valign="top" class="txt1">作为测试开发工程师主要负责的工作有：<br />1. MSN 网站测试<br />2. 作为Microsoft vendor从事于微软MSN网站的技术支持<br />3. 负责工具的开发 </td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+           </tbody>
+          </table> </td>
+        </tr>
+       </tbody>
+      </table>
+      <table xmlns="" cellspacing="0" cellpadding="0" border="0" class="box">
+       <tbody>
+        <tr>
+         <td class="plate1">项目经验</td>
+        </tr>
+        <tr>
+         <td class="tba">
+          <table cellspacing="0" cellpadding="0" border="0">
+           <tbody>
+           <tr>
+             <td class="p15">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="time">2019/07-现在</td>
+                 <td valign="top" class="rtbox"><strong>Hybrid Cloud</strong></td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">所属公司：</td>
+                     <td valign="top" class="txt1">携程计算机技术（上海）有限公司</td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">项目描述：</td>
+                     <td valign="top" class="txt1">为公司提供海外部署能力，主要提供包括AWS，阿里云上服务,提供Paas到SaaS的全流程服务 <br />
+                          </td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">责任描述：</td>
+                     <td valign="top" class="txt1">提供容器和虚机服务<br />
+                          提供存储能力<br />
+                          kubernetes集群组件自动扩缩CA,HPA, VPA研发<br />
+                          Aws 省钱及利用率提升<br />
+                          </td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+            <tr>
+             <td class="p15">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="time">2015/5-2019/7</td>
+                 <td valign="top" class="rtbox"><strong>Ctrip Paas 平台</strong></td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">所属公司：</td>
+                     <td valign="top" class="txt1">携程计算机技术（上海）有限公司</td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">项目描述：</td>
+                     <td valign="top" class="txt1">ctrip paas是全环境、全流程、全类型,一站式持续交付解决方案。主要包括应用管理, 环境管理, 发布计划, 服务集市,混合云和镜像仓库等,为各产线提供持续发布和容器部署的能力。<br />前端采用anjularjs框架,后端采用Django框架,MVC架构, 本项目结构分层合理,view层和serializer层独立开, model和service独立。层次间的依赖关系自下到上,业务层封装业务流程,为适应业务的变更,每一业务均有专门的模块。 <br />项目及团队获奖：<br />
+                         16年度技术研发中心最佳团队奖<br />
+                         17上半年获得杰出贡献奖-cpaas<br />
+                         17下半年获得杰出贡献奖-java容器迁移 </td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">责任描述：</td>
+                     <td valign="top" class="txt1">参与团队的需求分析和拟定技术方案<br />独立完成后台众多服务,像应用管理, 环境管理,容器资源管理,带领团队成员高效率协作；<br />开发中间件和通用模块,编写发布脚本及运维&amp;监控工具 <br />推进项目进度和多部门合作沟通<br />代码review及性能重构 </td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+            <tr>
+             <td class="p15 con">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="time">2014/11-2015/4</td>
+                 <td valign="top" class="rtbox"><strong>测试环境管理平台</strong></td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">所属公司：</td>
+                     <td valign="top" class="txt1">携程计算机技术（上海）有限公司</td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">项目描述：</td>
+                     <td valign="top" class="txt1">开发测试环境平台, 平台主要内容负责公司测试环境维护和管理,nova机器生成及维护,数据dashboard展示<br />前端采用anjularjs框架,后端采用Django框架,MVC架构. </td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">责任描述：</td>
+                     <td valign="top" class="txt1">独立开发部分前后端模块,项目日常维护</td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+            <tr>
+             <td class="p15 con">
+              <table cellspacing="0" cellpadding="0" border="0">
+               <tbody>
+                <tr>
+                 <td valign="top" class="time">2013/10-2014/10</td>
+                 <td valign="top" class="rtbox"><strong>LPT平台开发</strong></td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">所属公司：</td>
+                     <td valign="top" class="txt1">携程计算机技术（上海）有限公司</td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">项目描述：</td>
+                     <td valign="top" class="txt1">该项目主要是实现性能测试的自动化平台。各产线通过本平台实现任务调度, 性能监控。<br />项目前端采用anjularjs框架, 后端用C#, MVC架构 </td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+                <tr>
+                 <td class="tb1" colspan="2">
+                  <table cellspacing="0" cellpadding="0" border="0">
+                   <tbody>
+                    <tr>
+                     <td valign="top" class="keys">责任描述：</td>
+                     <td valign="top" class="txt1">主要负责loadrunner和jmeter任务的调度开发任务,自定义模块报表的展示 </td>
+                    </tr>
+                   </tbody>
+                  </table> </td>
+                </tr>
+               </tbody>
+              </table> </td>
+            </tr>
+           </tbody>
+          </table> </td>
+        </tr>
+       </tbody>
+      </table>
+
+  <table xmlns="" cellspacing="0" cellpadding="0" border="0" class="box">
+   <tbody>
+    <tr>
+     <td class="plate1">个人荣誉</td>
+    </tr>
+    <tr>
+     <td class="tbb">
+      <table cellspacing="0" cellpadding="0" border="0">
+       <tbody>
+        <tr>
+         <td>
+          <table cellspacing="0" cellpadding="0" border="0">
+           <tbody>
+           <tr>
+             <td valign="top" class="time">2019</td>
+             <td valign="top" class="rtbox"><strong class="txt3">Ctrip hackathon 铜奖</strong></td>
+            </tr>
+           <tr>
+             <td valign="top" class="time">2018 </td>
+             <td valign="top" class="rtbox" ><strong class="txt3">Ctrip hackathon 银奖</strong></td>
+            </tr>
+            <tr>
+             <td valign="top" class="time">2011</td>
+             <td valign="top" class="rtbox"><strong class="txt3">优秀毕业生</strong></td>
+            </tr>
+      </tbody>
+          </table></td>
+        </tr>
+       </tbody>
+      </table></td>
+    </tr>
+   </tbody>
+  </table>
+
+     </td>
+    </tr>
+   </tbody>
+  </table>
+<br /><br /><br />
+ </body>
+</html>

@@ -1,0 +1,251 @@
+---
+title: "Python Mock入门和代码示例"
+layout: post
+date: 2017-03-15 22:48
+image: /img/images/markdown.jpg
+headerImage: false
+tag:
+- unittest
+- python
+category: blog
+author: dong
+description: Markdown summary with different options
+# jemoji: '<img class="emoji" title=":ramen:" alt=":ramen:" src="https://assets.github.com/images/icons/emoji/unicode/1f35c.png" height="20" width="20" align="absmiddle">'
+---
+
+### 目录
+- [一些常用的mock示例](#一些常用的mock示例)
+- [mock静态方法](#mock静态方法)
+- [mock链式调用](#mock链式调用)
+- [Mock和MagicMock的区别](#Mock和MagicMock的区别)
+
+### 一些常用的mock示例
+先简单定义个类，方便举例:
+```python
+class Person:
+    def __init__(self):
+        self.__age = 10
+
+    def get_fullname(self, first_name, last_name):
+        return first_name + ' ' + last_name
+
+    def get_age(self):
+        return self.__age
+
+    @staticmethod
+    def get_class_name():
+        return Person.__name__
+```
+这个类里有两个成员方法，一个有参数，一个无参数。还有一个静态方法
+### mock成员方法
+#### 1. 使用Mock类，返回固定值
+```python
+class PersonTest(TestCase):
+    def test_should_get_age(self):
+        p = Person()
+
+        # 不mock时，get_age应该返回10
+        self.assertEqual(p.get_age(), 10)
+
+        # mock掉get_age方法，让它返回20
+        p.get_age = Mock(return_value=20)
+        self.assertEqual(p.get_age(), 20)
+
+    def test_should_get_fullname(self):
+        p = Person()
+
+        # mock掉get_fullname，让它返回'James Harden'
+        p.get_fullname = Mock(return_value='James Harden')
+        self.assertEqual(p.get_fullname(), 'James Harden')
+```
+#### 2. 校验参数个数，再返回固定值
+上面的例子你也许已经注意到了，调用p.get_fullname时没有给任何的参数，但是依然可以工作。
+如果想校验参数需要用create_autospec模块方法替代Mock类。
+
+```python
+class PersonTest(TestCase):
+    def test_should_get_fullname(self):
+        p = Person()
+
+        p.get_fullname = create_autospec(p.get_fullname, return_value='James Harden')
+
+        # 随便给两个参数，依然会返回mock的值
+        self.assertEqual(p.get_fullname('1', '2'), 'James Harden')
+
+        # 如果参数个数不对，会报错TypeError: missing a required argument: 'last_name'
+        p.get_fullname('1')
+```
+
+#### 3. 使用side_effect, 依次返回指定值
+```python
+class PersonTest(TestCase):
+    def test_should_get_age(self):
+        p = Person()
+
+        p.get_age = Mock(side_effect=[10, 11, 12])
+
+        self.assertEqual(p.get_age(), 10)
+        self.assertEqual(p.get_age(), 11)
+        self.assertEqual(p.get_age(), 12)
+```
+#### 4. 根据参数不同，返回不同的值
+```python
+class PersonTest(TestCase):
+    def test_should_get_fullname(self):
+        p = Person()
+
+        values = {('James', 'Harden'): 'James Harden', ('Tracy', 'Grady'): 'Tracy Grady'}
+        p.get_fullname = Mock(side_effect=lambda x, y: values[(x, y)])
+
+        self.assertEqual(p.get_fullname('James', 'Harden'), 'James Harden')
+        self.assertEqual(p.get_fullname('Tracy', 'Grady'), 'Tracy Grady')
+```
+#### 5. 抛出异常
+```python
+class PersonTest(TestCase):
+    def test_should_raise_exception(self):
+        p = Person()
+
+        p.get_age = Mock(side_effect=TypeError('integer type'))
+        # 只要调就会抛出异常
+        self.assertRaises(TypeError, p.get_age)
+```
+#### 6. 检验是否调用
+```python
+class PersonTest(TestCase):
+    def test_should_validate_method_calling(self):
+        p.get_fullname = Mock(return_value='James Harden')
+
+        # 没调用过
+        p.get_fullname.assert_not_called()  # Python 3.5
+
+        p.get_fullname('1', '2')
+
+        # 调用过任意次数
+        p.get_fullname.assert_called() # Python 3.6
+        # 只调用过一次, 不管参数
+        p.get_fullname.assert_called_once() # Python 3.6
+        # 只调用过一次，并且符合指定的参数
+        p.get_fullname.assert_called_once_with('1', '2')
+
+        p.get_fullname('3', '4')
+        # 只要调用过即可，必须指定参数
+        p.get_fullname.assert_any_call('1', '2')
+
+        # 重置mock，重置之后相当于没有调用过
+        p.get_fullname.reset_mock()
+        p.get_fullname.assert_not_called()
+
+        # Mock对象里除了return_value, side_effect属性外，
+        # called表示是否调用过，call_count可以返回调用的次数
+        self.assertEqual(p.get_fullname.called, False)
+        self.assertEqual(p.get_fullname.call_count, 0)
+
+        p.get_fullname('1', '2')
+        p.get_fullname('3', '4')
+        self.assertEqual(p.get_fullname.called, True)
+        self.assertEqual(p.get_fullname.call_count, 2)
+```
+
+### mock静态方法
+静态方法和模块方法需要使用patch来mock。
+#### 1. 在测试方法参数中得到Mock对象
+```python
+class PersonTest(TestCase):
+    # 以字符串的形式列出静态方法的路径，在测试的参数里会自动得到一个Mock对象
+    @patch('your.package.module.Person.get_class_name')
+    def test_should_get_class_name(self, mock_get_class_name):
+        mock_get_class_name.return_value = 'Guy'
+
+        self.assertEqual(Person.get_class_name(), 'Guy')
+```
+#### 2. 在patch中设置Mock对象
+```python
+class PersonTest(TestCase):
+    mock_get_class_name = Mock(return_value='Guy')
+
+    # 在patch中给出定义好的Mock的对象，好处是定义好的对象可以复用
+    @patch('your.package.module.Person.get_class_name', mock_get_class_name)
+    def test_should_get_class_name(self):
+        self.assertEqual(Person.get_class_name(), 'Guy')
+```
+#### 3. 使用patch.object
+```python
+class PersonTest(TestCase):
+    mock_get_class_name = Mock(return_value='Guy')
+
+    # 使用patch.object来mock，好处是Person类不是以字符串形式给出的
+    @patch.object(Person, 'get_class_name', mock_get_class_name)
+    def test_should_get_class_name(self, ):
+        self.assertEqual(Person.get_class_name(), 'Guy')
+```
+#### 4. 使用with控制作用域
+```python
+class PersonTest(TestCase):
+    # 作用域之外，依然返回真实值
+    def test_should_get_class_name(self, ):
+        mock_get_class_name = Mock(return_value='Guy')
+        with patch('your.package.module.Person.get_class_name', mock_get_class_name):
+            self.assertEqual(Person.get_class_name(), 'Guy')
+
+        self.assertEqual(Person.get_class_name(), 'Person')
+```
+
+### mock链式调用
+在django里，我们经常需要mock数据库，而访问数据库时经常是链式调用，看个例子。有个模块方法，返回数据库中所有指定name的人员，并按age排序
+mock掉整个数据库访问
+```python
+def get_person(name):
+    return Person.objects.filter(name=name).order_by('age')
+@patch('your.package.module.Person.objects.filter')
+def test_should_get_person(self, mock_filter):
+    # 先得到一个filter的Mock对象，再在return_value中设置一个Mock对象，此时不需要自己再创建
+    mock_filter.return_value.order_by.return_value = None
+
+    self.assertIsNone(get_person())
+```
+
+### Mock和MagicMock的区别
+Python的unittest.mock模块中提供了两个主要的mock类，分别是Mock和MagicMock.
+```python
+MagicMock is a subclass of Mock with default implementations of most of the magic methods. You can use MagicMock without having to configure the magic methods yourself.
+```
+其实已经很清楚了，MagicMock是Mock的子类，并且预先创建了全部magic method的mock。
+也就是说，如果不需要mock magic method，两者使用起来并没有什么分别。
+看例子理解两者的不同
+```python
+def test_should_raise_exception(self):
+    m = Mock()
+    list(m)
+
+TypeError: 'Mock' object is not iterable
+```
+
+因为使用Mock类时，默认不会创建__iter__这个magic method的mock，所以报错。
+
+如果想mock __iter__这个方法，得自己去做，如下：
+```python
+def test_should_mock_magic_method_with_Mock(self):
+    m = Mock()
+    m.__iter__ = Mock(return_value=iter([]))
+
+    self.assertEqual(list(m), [])
+```
+而使用MagicMock类时默认就会mock掉所有的magic method，所以不需要自己mock，__iter__默认是空数组：
+
+```python
+def test_should_mock_magic_method_with_MagicMock(self):
+    m = MagicMock()
+    m.__iter__.return_value = [1, 2, 3]
+
+    self.assertEqual(list(m), [1, 2, 3])
+```
+
+推荐阅读
+
+<https://segmentfault.com/a/1190000002965620>
+
+<http://engineroom.trackmaven.com/blog/making-a-mockery-of-python/>
+
+<https://docs.python.org/3/library/unittest.mock.html>
+

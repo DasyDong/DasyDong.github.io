@@ -1,0 +1,124 @@
+---
+title: "kubernetes cluster autoscaler调研(一)"
+layout: post
+date: 2019-07-01 15:38
+image: /img/images/markdown.jpg
+headerImage: false
+tag:
+- k8s
+category: blog
+author: dong
+
+---
+
+## [kubernetes cluster autoscaler调研](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
+
+## 什么是cluster-autoscaler
+CA（ cluster-autoscaler）是用来弹性伸缩kubernetes集群的。我们在使用kubernetes集群经常问到的一个问题是，我应该保持多大的节点规模来满足应用需求呢？ cluster-autoscaler的出现解决了这个问题，它可以自动的根据部署的应用所请求的资源量来动态的伸缩集群
+
+### 什么时候扩？
+由于资源不足，pod调度失败，导致pod处于pending状态时
+### 什么时候缩？
+node的资源利用率较低时，且此node上存在的pod都能被重新调度到其他节点
+
+### 什么样的节点不会被CA删除
+* 节点上有pod被PodDisruptionBudget控制器限制。
+* 节点上有命名空间是kube-system的pods。
+* 节点上的pod不是被控制器创建，例如不是被deployment, replica set, job, stateful set创建。
+* 节点上有pod使用了本地存储
+* 节点上pod驱逐后无处可去，即没有其他node能调度这个pod
+* 节点有注解：”cluster-autoscaler.kubernetes.io/scale-down-disabled”: “true”
+
+### 如何防止node被Cluster Autoscaler删除
+kubectl annotate node  cluster-autoscaler.kubernetes.io/scale-down-disabled=true
+### 部署方式
+deployment
+### What does CA do?
+
+Monitor the state of the cluster
+Look for pending pods
+Simulate scheduler
+Resize NodeGroups based on result of simulations
+
+### What CA doesn't do?
+
+Register nodes in kubernetes
+Configure nodes in any way
+Put any labels or taints on new nodes
+Look at actual resource usage
+Support custom scheduling
+Predictive autoscaling
+
+### Cluster Autoscaler架构
+![k8s-ca](/img/images/k8s/k8s-ca.png "k8s-ca")
+
+autoscaler：核心模块，负责整体扩缩容功能
+Estimator：负责评估计算扩容
+Simulator：负责模拟调度，计算缩容
+Cloud Provider：抽象了CloudProvider及NodeGroup等相关接口，与云API交互
+
+### 扩容流程
+![k8s-ca-up](/img/images/k8s/k8s-ca-up.png "k8s-ca-up")
+
+Cluster autoscaler每10s检查是否有pod处于pending状态
+当发现有pod由于资源不足而处于pending状态，Cluster Autoscaler准备进行node的储备
+由cloud provider创建node，node加入集群，进入ready状态
+
+
+
+Scale-up启动一个API监听的服务，每10s(--scan-interval)检查因为无node可调度导致pending的pods，即unschedulable pods，PodCondition=false，reason=unschedulable。CA假设集群是基于node groups，同个node group里的机器具有相同的性能和同样的labesl集。基于这个袈裟，CA为每个node group创建一个template nodes。
+Expander：用于根据策略决定scale up哪个node group。
+新node拉取之后需要一些时间才能被注册到kubernetes，依赖于cloud provider和部署的时间。CA希望node在集群中的等待时间在15m之内（max-node-provision-time）。如果未如期注册，scale up会拉起新node并移除未注册的node
+### 如何监控Cluster Autoscaler
+CA metrics
+
+/metrics
+/health-check
+
+### CA集群状态检查
+![k8s-cluster](/img/images/k8s/k8s-cluster.png "k8s-cluster")
+
+/var/log/cluster-autoscaler.log
+
+kubectl get configmap cluster-autoscaler-status -n kube-system -o yaml
+
+Events
+
+on pods (特别是unscheduled pods)
+on nodes
+on kube-system/cluster-autoscaler-status config map
+
+
+kubectl get events -n kube-system | grep cluster-autoscaler-status
+
+### [CA Events](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#what-events-are-emitted-by-ca)
+### [参数解析](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#what-are-the-parameters-to-ca)
+
+### [如何开发CA](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#what-events-are-emitted-by-ca)
+
+### 部署使用CA
+直接在集群中部署即可，简化的yaml如下所示，启动参数按需添加，其中{{MIN}}是最小节点数，{{MAX}}是最大节点数
+```
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cluster-autoscaler
+  labels:
+    k8s-app: cluster-autoscaler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: cluster-autoscaler
+  template:
+    metadata:
+      labels:
+        k8s-app: cluster-autoscaler
+    spec:
+      containers:
+        - image: cluster-autoscaler:latest
+          name: cluster-autoscaler
+          command:
+            - ./cluster-autoscaler
+            - --nodes={{MIN}}:{{MAX}}:k8s-worker-asg-1
+```

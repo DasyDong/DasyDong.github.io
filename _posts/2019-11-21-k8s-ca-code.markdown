@@ -1,0 +1,29 @@
+---
+title: "kubernetes CA 代码逻辑图"
+layout: post
+date: 2019-11-26 15:38
+image: /img/images/markdown.jpg
+headerImage: false
+tag:
+- k8s
+category: blog
+author: dong
+
+---
+# CA 代码逻辑图
+
+## CA 时序图
+![ca](/img/images/k8s/k8s-ca-logic.png)
+
+
+## CA scaldown流程图
+![ScaleDown](/img/images/k8s/k8s-scaledown-2.png)
+
+
+## CA scalup流程图
+
+![ScaleUp](/img/images/k8s/k8s-scale-up.png)
+
+
+## cloudprovider 简单版流程图
+![CA](/img/images/k8s/paas-ca.png)

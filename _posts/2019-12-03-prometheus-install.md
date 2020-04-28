@@ -1,7 +1,7 @@
 ---
 title: "部署prometheus"
 layout: post
-date: 2020-03-03 15:38
+date: 2019-12-03 15:38
 image: /img/images/markdown.jpg
 headerImage: false
 tag:

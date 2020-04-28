@@ -1,7 +1,7 @@
 ---
 title: "kubernetes CA、VPA、HPA(终)"
 layout: post
-date: 2019-12-06 15:38
+date: 2019-12-21 15:38
 image: /img/images/markdown.jpg
 headerImage: false
 tag:
